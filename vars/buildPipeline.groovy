@@ -5,16 +5,19 @@ def call(Closure config) {
     config()
 
     echo "Auto-doc: ${settings.enableAutoDocumentation}"
-    stage('Checkout source code') {
-         checkout([
-            $class: 'GitSCM',
-            branches: [[name: env.BRANCH_NAME]],
-            doGenerateSubmoduleConfigurations: false,
-            extensions: [],
-            userRemoteConfigs: [[
-                url: 'git@github.com:hpatel1234/sample-app-for-doc-updater.git',
-                credentialsId: 'GITHUB_CRED'
-            ]]
-        ])
+    node {
+        stage('Checkout source code') {
+            checkout([
+                $class: 'GitSCM',
+                branches: [[name: env.BRANCH_NAME]],
+                doGenerateSubmoduleConfigurations: false,
+                extensions: [],
+                userRemoteConfigs: [[
+                    url: 'git@github.com:hpatel1234/sample-app-for-doc-updater.git',
+                    credentialsId: 'GITHUB_CRED'
+                ]]
+            ])
+        }
     }
+    
 }
