@@ -13,7 +13,7 @@ def call(Closure config) {
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [],
                 userRemoteConfigs: [[
-                    url: 'git@github.com:hpatel1234/sample-app-for-doc-updater.git',
+                    url: 'https://github.com/hpatel1234/sample-app-for-doc-updater.git',
                     credentialsId: 'GITHUB_CRED'
                 ]]
             ])
