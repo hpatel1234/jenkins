@@ -19,7 +19,7 @@ def call(Closure config) {
             ])
         }
         stage('Run knowedge builder') {
-            sh 'python3 print("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")'
+            sh 'python3 -c "print(\\"HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\\")"'
         }
     }
     
