@@ -29,7 +29,9 @@ def call(Closure config) {
                 sh 'python3 -m venv virtual_env'
                 def bin_dir='virtual_env/bin'
                 dir(bin_dir) {
+                    print("Environment created installing dependencies")
                     sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
+                    sh 'bash -c "source activate && python3 ../../documentation/knowledge_graph_builder.py --repo ../../src/main/java && deactivate"'
                 }
             }
 
