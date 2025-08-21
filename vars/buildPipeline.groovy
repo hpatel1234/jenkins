@@ -7,7 +7,10 @@ def call(Closure config) {
     echo "Auto-doc: ${settings.enableAutoDocumentation}"
     node {
         print("${env.WORKSPACE}")
+        print("${env.JOB_NAME}")
+        sh 'printenv'
         stage('Checkout source code') {
+            dir()
             checkout([
                 $class: 'GitSCM',
                 branches: [[name: env.BRANCH_NAME]],
