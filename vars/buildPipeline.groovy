@@ -26,8 +26,12 @@ def call(Closure config) {
         }
         stage('Create knowledge graph') {
             dir(repoName) {
+                print("We are creating virtual environment please wait.")
                 sh 'python3 -m venv virtual_env'
-                sh 'ls -1 virtual_env'
+                def bin_dir='virtual_env/bin'
+                dir(bin_dir) {
+                    sh 'bash && source activate && pip3 install -r ../../documentation/requirements.txt && deactivate'
+                }
             }
 
         }
