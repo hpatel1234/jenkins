@@ -30,7 +30,7 @@ def call(Closure config) {
                 sh 'python3 -m venv virtual_env'
                 def bin_dir='virtual_env/bin'
                 dir(bin_dir) {
-                    sh 'bash && source activate && pip3 install -r ../../documentation/requirements.txt && deactivate'
+                    bash 'source activate && pip3 install -r ../../documentation/requirements.txt && deactivate'
                 }
             }
 
