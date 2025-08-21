@@ -8,7 +8,6 @@ def call(Closure config) {
     node {
         WORKSPACE_DIR=env.WORKSPACE
         def repoName = env.JOB_NAME.tokenize('/')[0]
-        sh 'printenv'
         stage('Checkout source code') {
             dir(repoName) {
                 checkout([
@@ -30,7 +29,7 @@ def call(Closure config) {
                 sh 'python3 -m venv virtual_env'
                 def bin_dir='virtual_env/bin'
                 dir(bin_dir) {
-                    bash 'source activate && pip3 install -r ../../documentation/requirements.txt && deactivate'
+                    sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
                 }
             }
 
