@@ -57,7 +57,20 @@ def call(Closure config) {
                     sh 'bash -c "mkdir -p ../../documentation/generated/"'
                     sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
                 }
-                sh 'bash -c "git commit documentation/generated/documentation.html -m \"Auto Committed file\""'
+                sh '''
+                    # Check if file is tracked by git
+                    if ! git ls-files --error-unmatch "$documentation/generated/documentation.html" > /dev/null 2>&1; then
+                        git add "documentation/generated/documentation.html"
+                    fi
+
+                    # Check if there's anything to commit
+                    if git diff --cached --quiet; then
+                        echo "Nothing to commit"
+                    else
+                        git commit -m "Auto Committed file"
+                    fi
+                '''
+                //sh 'bash -c "git commit documentation/generated/documentation.html -m \"Auto Committed file\""'
                 withCredentials([usernamePassword(credentialsId: "GITHUB_CRED", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                     sh """
                             git push https://${GIT_USER}:${GIT_PASS}@github.com/hpatel1234/${repoName}.git HEAD:auto-doc
