@@ -48,12 +48,7 @@ def call(Closure config) {
             }
 
         }
-        stage('Moving Auto generated documentation to source directory') {
-            dir(repoName) {
 
-            }
-
-        }
         stage('Creating Pull request') {
             dir(repoName) {
                 sh 'bash -c "git checkout main && git checkout -b auto-doc"'
