@@ -52,9 +52,9 @@ def call(Closure config) {
         stage('Creating Pull request') {
             dir(repoName) {
                 sh 'bash -c "git checkout main && git checkout -b auto-doc"'
-                sh 'bash -c "mkdir -p ../../documentation/generated/"'
                 def bin_dir='virtual_env/bin'
                 dir(bin_dir) {
+                    sh 'bash -c "mkdir -p ../../documentation/generated/"'
                     sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
                 }
                 sh 'bash -c "git commit documentation/generated/documentation.html -m \"Auto Committed file\""'
