@@ -31,7 +31,10 @@ def call(Closure config) {
                 dir(bin_dir) {
                     print("Environment created installing dependencies")
                     sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
+                    print("Dependencies installed, started creating knowledge graph")
                     sh 'bash -c "source activate && python3 ../../documentation/knowledge_graph_builder.py --repo ../../src/main/java && deactivate"'
+                    print("Knowledge graph created, started creating documentation")
+                    sh 'bash -c "source activate && python3 ../../documentation/main.py && deactivate"'
                 }
             }
 
