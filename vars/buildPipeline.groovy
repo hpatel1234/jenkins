@@ -6,24 +6,30 @@ def call(Closure config) {
 
     echo "Auto-doc: ${settings.enableAutoDocumentation}"
     node {
-        print("${env.WORKSPACE}")
-        print("${env.JOB_NAME}")
+        WORKSPACE_DIR=env.WORKSPACE
+        def repoName = env.JOB_NAME.tokenize('/')[0]
         sh 'printenv'
         stage('Checkout source code') {
-            dir()
-            checkout([
-                $class: 'GitSCM',
-                branches: [[name: env.BRANCH_NAME]],
-                doGenerateSubmoduleConfigurations: false,
-                extensions: [],
-                userRemoteConfigs: [[
-                    url: 'https://github.com/hpatel1234/sample-app-for-doc-updater.git',
-                    credentialsId: 'GITHUB_CRED'
-                ]]
-            ])
+            dir(repoName) {
+                checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: env.BRANCH_NAME]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        userRemoteConfigs: [[
+                                                    url: 'https://github.com/hpatel1234/sample-app-for-doc-updater.git',
+                                                    credentialsId: 'GITHUB_CRED'
+                                            ]]
+                ])
+            }
+
         }
-        stage('Run knowedge builder') {
-            sh 'python3 -c "print(\\"HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\\")"'
+        stage('Create knowledge graph') {
+            dir(repoName) {
+                sh 'python3 -m venv virtual_env'
+                sh 'ls -1 virtual_env'
+            }
+
         }
     }
     
