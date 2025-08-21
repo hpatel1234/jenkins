@@ -58,6 +58,8 @@ def call(Closure config) {
                     sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
                 }
                 sh '''
+                        git config user.email "hpatel571989@gmail.com"
+                        git config user.name "hpatel1234"
                     # Check if file is tracked by git
                     if ! git ls-files --error-unmatch "$documentation/generated/documentation.html" > /dev/null 2>&1; then
                         git add "documentation/generated/documentation.html"
