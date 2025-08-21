@@ -6,6 +6,7 @@ def call(Closure config) {
 
     echo "Auto-doc: ${settings.enableAutoDocumentation}"
     node {
+        print("${env.WORKSPACE}")
         stage('Checkout source code') {
             checkout([
                 $class: 'GitSCM',
