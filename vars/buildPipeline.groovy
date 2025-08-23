@@ -91,7 +91,7 @@ def call(Closure config) {
                             curl -s -X POST \
                               -H "Authorization: token ${GITHUB_TOKEN}" \
                               -H "Accept: application/vnd.github.v3+json" \
-                              https://api.github.com/repos/${REPO}/pulls \
+                              https://api.github.com/repos/hpatel1234/${repoName}/pulls \
                               -d '${payload}'
                         """
                         }
