@@ -101,7 +101,7 @@ def call(Closure config) {
             } else {
                 stage('Publish to confluence') {
                     withCredentials([string(credentialsId: 'confluence-api-token', variable: 'CONFLUENCE_TOKEN')]) {
-                        def CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
+                        def CONFLUENCE_USER = 'hpatel5719891@gmail.com'      // Jenkins string credential (username)
                         def CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
                         def CONFLUENCE_SPACE = 'DS'
                         def PARENT_PAGE_ID = '1179657'
