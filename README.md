@@ -14,7 +14,8 @@
 2. Generate classic token for your profile
 3. Login to jenkins and Click on Settings icon top right corner.
 4. Click on "Credentials"
-5. Add your username and token generated
+5. Add Credentials of type  username and password. Username is your github username and password is token generated
+6. Add one more credential of type Secret text, enter your token in secret.
 ### Jenkins lib set up
 6. Again Click on Settings icon top right corner. Then System
 9. Search for "Global Trusted Pipeline Libraries" on page and configure this repository as jenkins Lib
