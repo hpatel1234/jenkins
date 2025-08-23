@@ -9,6 +9,14 @@ def call(Closure config) {
         try {
             WORKSPACE_DIR=env.WORKSPACE
             def repoName = env.JOB_NAME.tokenize('/')[0]
+            environment {
+                CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
+                CONFLUENCE_TOKEN = credentials('confluence-api-token') // Jenkins secret text (API token)
+                CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
+                CONFLUENCE_SPACE = 'DS'
+                PARENT_PAGE_ID = '1179657'
+                PAGE_TITLE = 'Sample Application ETL Logic'
+            }
             stage('Checkout source code') {
                 dir(repoName) {
                     checkout([
@@ -24,41 +32,42 @@ def call(Closure config) {
                 }
 
             }
-            stage('Creating python virtual environment') {
-                dir(repoName) {
-                    print("We are creating virtual environment please wait.")
-                    sh 'python3 -m venv virtual_env'
-                    def bin_dir='virtual_env/bin'
-                    dir(bin_dir) {
-                        print("Environment created installing dependencies")
-                        sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
-                        print("Dependencies installed.")
+            if("main" != env.BRANCH_NAME) {
+                stage('Creating python virtual environment') {
+                    dir(repoName) {
+                        print("We are creating virtual environment please wait.")
+                        sh 'python3 -m venv virtual_env'
+                        def bin_dir='virtual_env/bin'
+                        dir(bin_dir) {
+                            print("Environment created installing dependencies")
+                            sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
+                            print("Dependencies installed.")
+                        }
                     }
+
+                }
+                stage('Create knowledge graph and documentation') {
+                    dir(repoName) {
+                        def bin_dir='virtual_env/bin'
+                        dir(bin_dir) {
+                            print("Creating knowledge graph")
+                            sh 'bash -c "source activate && python3 ../../documentation/knowledge_graph_builder.py --repo ../../src/main/java && deactivate"'
+                            print("Knowledge graph created, started creating documentation")
+                            sh 'bash -c "source activate && python3 ../../documentation/main.py && deactivate"'
+                        }
+                    }
+
                 }
 
-            }
-            stage('Create knowledge graph and documentation') {
-                dir(repoName) {
-                    def bin_dir='virtual_env/bin'
-                    dir(bin_dir) {
-                        print("Creating knowledge graph")
-                        sh 'bash -c "source activate && python3 ../../documentation/knowledge_graph_builder.py --repo ../../src/main/java && deactivate"'
-                        print("Knowledge graph created, started creating documentation")
-                        sh 'bash -c "source activate && python3 ../../documentation/main.py && deactivate"'
-                    }
-                }
-
-            }
-
-            stage('Push updated documentation') {
-                dir(repoName) {
-                    sh "git checkout main && git checkout -b ${env.BRANCH_NAME}-auto-doc"
-                    def bin_dir='virtual_env/bin'
-                    dir(bin_dir) {
-                        sh 'bash -c "mkdir -p ../../documentation/generated/"'
-                        sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
-                    }
-                    sh '''
+                stage('Push updated documentation') {
+                    dir(repoName) {
+                        sh "git checkout main && git checkout -b ${env.BRANCH_NAME}-auto-doc"
+                        def bin_dir='virtual_env/bin'
+                        dir(bin_dir) {
+                            sh 'bash -c "mkdir -p ../../documentation/generated/"'
+                            sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
+                        }
+                        sh '''
                         git config user.email "hpatel571989@gmail.com"
                         git config user.name "hpatel1234"
                     # Check if file is tracked by git
@@ -73,29 +82,60 @@ def call(Closure config) {
                         git commit -m "Auto Committed file"
                     fi
                 '''
-                    withCredentials([usernamePassword(credentialsId: "GITHUB_CRED", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                        sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/hpatel1234/${repoName}.git HEAD:${env.BRANCH_NAME}-auto-doc"
+                        withCredentials([usernamePassword(credentialsId: "GITHUB_CRED", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                            sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/hpatel1234/${repoName}.git HEAD:${env.BRANCH_NAME}-auto-doc"
+                        }
                     }
-                }
 
-            }
-            stage('Create Pull Request') {
-                        withCredentials([string(credentialsId: 'github-api-cred', variable: 'GITHUB_TOKEN')]) {
-                            def payload = """{
+                }
+                stage('Create Pull Request') {
+                    withCredentials([string(credentialsId: 'github-api-cred', variable: 'GITHUB_TOKEN')]) {
+                        def payload = """{
                           "title": "Automated PR from Jenkins",
                           "head": "${env.BRANCH_NAME}-auto-doc",
                           "base": "main",
                           "body": "This PR was created by Jenkins using GitHub API plugin for updating documentation"
                         }"""
-                            sh """
+                        sh """
                             curl -s -X POST \
                               -H "Authorization: token ${GITHUB_TOKEN}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               https://api.github.com/repos/hpatel1234/${repoName}/pulls \
                               -d '${payload}'
                         """
+                    }
+                }
+            } else {
+                stage('Publish to confluence') {
+                    dir(repoName) {
+                        def htmlContent = readFile('documentation/generated/documentation.html')
+                        htmlContent = htmlContent.replace('"', '\\"').replace('\n', '')  // sanitize
+
+                        def payload = """
+                        {
+                            "type": "page",
+                            "title": "${PAGE_TITLE}",
+                            "ancestors": [{"id": ${PARENT_PAGE_ID}}],
+                            "space": {"key": "${CONFLUENCE_SPACE}"},
+                            "body": {
+                                "storage": {
+                                    "value": "${htmlContent}",
+                                    "representation": "storage"
+                                }
+                            }
                         }
+                        """
+                        sh """
+                        curl -u "${CONFLUENCE_USER}:${CONFLUENCE_TOKEN}" \
+                         -X POST \
+                         -H "Content-Type: application/json" \
+                         ${CONFLUENCE_URL}/rest/api/content \
+                         -d '${payload}'
+                        """
+                    }
+                }
             }
+
         } finally {
             cleanWs()
         }
