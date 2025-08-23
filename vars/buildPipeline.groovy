@@ -9,12 +9,7 @@ def call(Closure config) {
         try {
             def WORKSPACE_DIR=env.WORKSPACE
             def repoName = env.JOB_NAME.tokenize('/')[0]
-            def CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
-            def CONFLUENCE_TOKEN = credentials('confluence-api-token') // Jenkins secret text (API token)
-            def CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
-            def CONFLUENCE_SPACE = 'DS'
-            def PARENT_PAGE_ID = '1179657'
-            def PAGE_TITLE = 'Sample Application ETL Logic'
+
             stage('Checkout source code') {
                 dir(repoName) {
                     checkout([
@@ -105,11 +100,17 @@ def call(Closure config) {
                 }
             } else {
                 stage('Publish to confluence') {
-                    dir(repoName) {
-                        def htmlContent = readFile('documentation/generated/documentation.html')
-                        htmlContent = htmlContent.replace('"', '\\"').replace('\n', '')  // sanitize
+                    withCredentials([string(credentialsId: 'confluence-api-token', variable: 'CONFLUENCE_TOKEN')]) {
+                        def CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
+                        def CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
+                        def CONFLUENCE_SPACE = 'DS'
+                        def PARENT_PAGE_ID = '1179657'
+                        def PAGE_TITLE = 'Sample Application ETL Logic'
+                        dir(repoName) {
+                            def htmlContent = readFile('documentation/generated/documentation.html')
+                            htmlContent = htmlContent.replace('"', '\\"').replace('\n', '')  // sanitize
 
-                        def payload = """
+                            def payload = """
                         {
                             "type": "page",
                             "title": "${PAGE_TITLE}",
@@ -123,14 +124,16 @@ def call(Closure config) {
                             }
                         }
                         """
-                        sh """
+                            sh """
                         curl -u "${CONFLUENCE_USER}:${CONFLUENCE_TOKEN}" \
                          -X POST \
                          -H "Content-Type: application/json" \
                          ${CONFLUENCE_URL}/rest/api/content \
                          -d '${payload}'
                         """
+                        }
                     }
+
                 }
             }
 
