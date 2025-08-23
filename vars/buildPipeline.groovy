@@ -23,7 +23,7 @@ def call(Closure config) {
             }
 
         }
-        stage('Creating python virtual environmane') {
+        stage('Creating python virtual environment') {
             dir(repoName) {
                 print("We are creating virtual environment please wait.")
                 sh 'python3 -m venv virtual_env'
