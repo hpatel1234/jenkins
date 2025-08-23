@@ -114,9 +114,9 @@ def call(Closure config) {
                         def payload = """
                         {
                             "type": "page",
-                            "title": "${PAGE_TITLE}",
-                            "ancestors": [{"id": ${PARENT_PAGE_ID}}],
-                            "space": {"key": "${CONFLUENCE_SPACE}"},
+                            "title": "${environment.PAGE_TITLE}",
+                            "ancestors": [{"id": ${environment.PARENT_PAGE_ID}}],
+                            "space": {"key": "${environment.CONFLUENCE_SPACE}"},
                             "body": {
                                 "storage": {
                                     "value": "${htmlContent}",
@@ -126,10 +126,10 @@ def call(Closure config) {
                         }
                         """
                         sh """
-                        curl -u "${CONFLUENCE_USER}:${CONFLUENCE_TOKEN}" \
+                        curl -u "${environment.CONFLUENCE_USER}:${environment.CONFLUENCE_TOKEN}" \
                          -X POST \
                          -H "Content-Type: application/json" \
-                         ${CONFLUENCE_URL}/rest/api/content \
+                         ${environment.CONFLUENCE_URL}/rest/api/content \
                          -d '${payload}'
                         """
                     }
