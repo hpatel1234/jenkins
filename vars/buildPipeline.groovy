@@ -74,16 +74,12 @@ def call(Closure config) {
                     fi
                 '''
                     withCredentials([usernamePassword(credentialsId: "GITHUB_CRED", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                        sh """
-                            git push https://${GIT_USER}:${GIT_PASS}@github.com/hpatel1234/${repoName}.git HEAD:auto-doc
-                        """
+                        sh "git push https://${GIT_USER}:${GIT_PASS}@github.com/hpatel1234/${repoName}.git HEAD:${env.BRANCH_NAME}-auto-doc"
                     }
                 }
 
             }
             stage('Create Pull Request') {
-                steps {
-                    script {
                         withCredentials([string(credentialsId: 'github-api-cred', variable: 'GITHUB_TOKEN')]) {
                             def payload = """{
                           "title": "Automated PR from Jenkins",
@@ -99,8 +95,6 @@ def call(Closure config) {
                               -d '${payload}'
                         """
                         }
-                    }
-                }
             }
         } finally {
             cleanWs()
