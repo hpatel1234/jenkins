@@ -7,16 +7,14 @@ def call(Closure config) {
     echo "Auto-doc: ${settings.enableAutoDocumentation}"
     node {
         try {
-            WORKSPACE_DIR=env.WORKSPACE
+            def WORKSPACE_DIR=env.WORKSPACE
             def repoName = env.JOB_NAME.tokenize('/')[0]
-            environment {
-                CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
-                CONFLUENCE_TOKEN = credentials('confluence-api-token') // Jenkins secret text (API token)
-                CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
-                CONFLUENCE_SPACE = 'DS'
-                PARENT_PAGE_ID = '1179657'
-                PAGE_TITLE = 'Sample Application ETL Logic'
-            }
+            def CONFLUENCE_USER = 'hpatel5719891'      // Jenkins string credential (username)
+            def CONFLUENCE_TOKEN = credentials('confluence-api-token') // Jenkins secret text (API token)
+            def CONFLUENCE_URL = 'https://innovathon.atlassian.net/wiki'
+            def CONFLUENCE_SPACE = 'DS'
+            def PARENT_PAGE_ID = '1179657'
+            def PAGE_TITLE = 'Sample Application ETL Logic'
             stage('Checkout source code') {
                 dir(repoName) {
                     checkout([
@@ -114,9 +112,9 @@ def call(Closure config) {
                         def payload = """
                         {
                             "type": "page",
-                            "title": "${environment.PAGE_TITLE}",
-                            "ancestors": [{"id": ${environment.PARENT_PAGE_ID}}],
-                            "space": {"key": "${environment.CONFLUENCE_SPACE}"},
+                            "title": "${PAGE_TITLE}",
+                            "ancestors": [{"id": ${PARENT_PAGE_ID}}],
+                            "space": {"key": "${CONFLUENCE_SPACE}"},
                             "body": {
                                 "storage": {
                                     "value": "${htmlContent}",
@@ -126,10 +124,10 @@ def call(Closure config) {
                         }
                         """
                         sh """
-                        curl -u "${environment.CONFLUENCE_USER}:${environment.CONFLUENCE_TOKEN}" \
+                        curl -u "${CONFLUENCE_USER}:${CONFLUENCE_TOKEN}" \
                          -X POST \
                          -H "Content-Type: application/json" \
-                         ${environment.CONFLUENCE_URL}/rest/api/content \
+                         ${CONFLUENCE_URL}/rest/api/content \
                          -d '${payload}'
                         """
                     }
