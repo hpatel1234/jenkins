@@ -29,11 +29,11 @@ def call(Closure config) {
                 stage('Creating python virtual environment') {
                     dir(repoName) {
                         print("We are creating virtual environment please wait.")
-                        sh 'python3 -m venv virtual_env'
-                        def bin_dir='virtual_env/bin'
+                        sh 'python3 -m venv /var/jenkins_slave/workspace/virtual_env'
+                        def bin_dir='/var/jenkins_slave/workspace/virtual_env/bin'
                         dir(bin_dir) {
                             print("Environment created installing dependencies")
-                            sh 'bash -c "source activate && pip3 install -r ../../documentation/requirements.txt && deactivate"'
+                            sh "bash -c 'source activate && pip3 install -r ${env.WORKSPACE}/${repoName}/documentation/requirements.txt && deactivate'"
                             print("Dependencies installed.")
                         }
                     }
@@ -41,12 +41,12 @@ def call(Closure config) {
                 }
                 stage('Create knowledge graph and documentation') {
                     dir(repoName) {
-                        def bin_dir='virtual_env/bin'
+                        def bin_dir='/var/jenkins_slave/workspace/virtual_env/bin'
                         dir(bin_dir) {
                             print("Creating knowledge graph")
-                            sh 'bash -c "source activate && python3 ../../documentation/knowledge_graph_builder.py --repo ../../src/main/java && deactivate"'
+                            sh "bash -c 'source activate && python3 ${env.WORKSPACE}/${repoName}/documentation/knowledge_graph_builder.py --repo ${env.WORKSPACE}/${repoName}/src/main/java && deactivate'"
                             print("Knowledge graph created, started creating documentation")
-                            sh 'bash -c "source activate && python3 ../../documentation/main.py && deactivate"'
+                            sh "bash -c 'source activate && python3 ${env.WORKSPACE}/${repoName}/documentation/main.py && deactivate'"
                         }
                     }
 
@@ -55,10 +55,10 @@ def call(Closure config) {
                 stage('Push updated documentation') {
                     dir(repoName) {
                         sh "git checkout main && git checkout -b ${env.BRANCH_NAME}-auto-doc"
-                        def bin_dir='virtual_env/bin'
+                        def bin_dir='/var/jenkins_slave/workspace/virtual_env/bin'
                         dir(bin_dir) {
-                            sh 'bash -c "mkdir -p ../../documentation/generated/"'
-                            sh 'bash -c "mv documentation.html ../../documentation/generated/documentation.html"'
+                            sh "bash -c 'mkdir -p ${env.WORKSPACE}/${repoName}/documentation/generated/'"
+                            sh "bash -c 'mv documentation.html ${env.WORKSPACE}/${repoName}/documentation/generated/documentation.html'"
                         }
                         sh '''
                         git config user.email "hpatel571989@gmail.com"
